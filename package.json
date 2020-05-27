@@ -1,0 +1,24 @@
+{
+  "name": "homebridge-freebox-player",
+  "version": "1.0.0",
+  "description": "Homebridge plugin to control your Freebox Player",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/que20/homebridge-freebox-player.git"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "freebox"
+  ],
+  "author": "Kevin MAAREK",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/que20/homebridge-freebox-player/issues"
+  },
+  "homepage": "https://github.com/que20/homebridge-freebox-player#readme"
+}
