@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "homebridge": ">=1.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/que20/homebridge-freebox-player.git"
