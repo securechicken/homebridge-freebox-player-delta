@@ -1,5 +1,6 @@
 const PLUGIN_NAME = 'homebridge-freebox-player';
 const PLATFORM_NAME = 'HomebridgeFreeboxPlayer';
+const request = require('request');
 
 module.exports = (api) => {
     api.registerPlatform(PLATFORM_NAME, FreeboxPlayerPlugin);
@@ -117,41 +118,84 @@ class FreeboxPlayerPlugin {
                 callback(null);
             });
 
-        // HDMI 1 Input Source
-        const hdmi1InputService = this.tvAccessory.addService(this.Service.InputSource, 'hdmi1', 'HDMI 1');
-        hdmi1InputService
-            .setCharacteristic(this.Characteristic.Identifier, 1)
-            .setCharacteristic(this.Characteristic.ConfiguredName, 'HDMI 1')
-            .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-            .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-        tvService.addLinkedService(hdmi1InputService); // link to tv service
 
-        // HDMI 2 Input Source
-        const hdmi2InputService = this.tvAccessory.addService(this.Service.InputSource, 'hdmi2', 'HDMI 2');
-        hdmi2InputService
-            .setCharacteristic(this.Characteristic.Identifier, 2)
-            .setCharacteristic(this.Characteristic.ConfiguredName, 'HDMI 2')
-            .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-            .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-        tvService.addLinkedService(hdmi2InputService); // link to tv service
+        if (this.config.appsShortcutEnabled) {
+            // HDMI 1 Input Source
+            const hdmi1InputService = this.tvAccessory.addService(this.Service.InputSource, '-', '-');
+            hdmi1InputService
+                .setCharacteristic(this.Characteristic.Identifier, 1)
+                .setCharacteristic(this.Characteristic.ConfiguredName, '-')
+                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+            tvService.addLinkedService(hdmi1InputService); // link to tv service
 
-        // Netflix Input Source
-        const netflixInputService = this.tvAccessory.addService(this.Service.InputSource, 'netflix', 'Netflix');
-        netflixInputService
-            .setCharacteristic(this.Characteristic.Identifier, 3)
-            .setCharacteristic(this.Characteristic.ConfiguredName, 'Netflix')
-            .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-            .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-        tvService.addLinkedService(netflixInputService); // link to tv service
+            // HDMI 2 Input Source
+            const hdmi2InputService = this.tvAccessory.addService(this.Service.InputSource, 'home', 'Home');
+            hdmi2InputService
+                .setCharacteristic(this.Characteristic.Identifier, 2)
+                .setCharacteristic(this.Characteristic.ConfiguredName, 'Home')
+                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+            tvService.addLinkedService(hdmi2InputService); // link to tv service
+
+            // Netflix Input Source
+            const netflixInputService = this.tvAccessory.addService(this.Service.InputSource, 'netflix', 'Netflix');
+            netflixInputService
+                .setCharacteristic(this.Characteristic.Identifier, 3)
+                .setCharacteristic(this.Characteristic.ConfiguredName, 'Netflix')
+                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+            tvService.addLinkedService(netflixInputService); // link to tv service
+
+            // YouTube Input Source
+            const youTubeInputService = this.tvAccessory.addService(this.Service.InputSource, 'youTube', 'YouTube');
+            youTubeInputService
+                .setCharacteristic(this.Characteristic.Identifier, 4)
+                .setCharacteristic(this.Characteristic.ConfiguredName, 'YouTube')
+                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+            tvService.addLinkedService(youTubeInputService); // link to tv service
+        }
 
         this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccessory]);
+        this.netflixKeys = ['home', 'home', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'right', 'right', 'right', 'right', 'down', 'down', 'ok'];
+        this.youtubeKeys = ['home', 'home', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'right', 'ok'];
+        this.keyCounter = 0
     }
 
-    requestRemoteKey(key) {
-        console.log('[Remote]['+this.config.code+'] Requested ' + key)
+    requestRemoteKey(key, callback) {
+        let url = 'http://hd1.freebox.fr/pub/remote_control?key=' + key + '&code=' + this.config.code;
+        //console.log(url);
+        request(url, function (error, response, body) {
+            if (callback != null) {
+                callback();
+            }
+        });
     }
 
     requestSource(source) {
-        console.log('[Source] Requested ' + source)
+        //console.log('[Source] Requested ' + source);
+        if (source == 2) {
+            this.requestRemoteKey('home')
+        }
+        if (source == 3) {
+            this.jumpMenu(this.netflixKeys);
+        }
+        if (source == 4) {
+            this.jumpMenu(this.youtubeKeys);
+        }
+    }
+
+    jumpMenu(path) {
+        if (this.keyCounter == path.length) {
+            this.keyCounter = 0;
+            return;
+        }
+        let key = path[this.keyCounter]
+        //console.log('requesting '+key);
+        this.requestRemoteKey(key, () => {
+            this.keyCounter = this.keyCounter + 1;
+            this.jumpMenu(path);
+        })
     }
 }
