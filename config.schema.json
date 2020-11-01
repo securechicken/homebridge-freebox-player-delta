@@ -22,7 +22,7 @@
 			},
 			"hostname": {
 				"title": "Player Hostname",
-				"description": "Your Freebox Player device network hostname or IPv4/6 address"
+				"description": "Your Freebox Player device network hostname or IPv4/6 address",
 				"type": "string",
 				"required": true
 			}
