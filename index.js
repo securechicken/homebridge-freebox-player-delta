@@ -23,7 +23,7 @@ SERVICE_IDENTIFIER_YOUTUBE = 4;
 SERVICE_IDENTIFIER_MEDIA = 5;
 
 module.exports = (api) => {
-	api.registerPlatform(PLATFORM_NAME, FreeboxPlayerDeltaPlugin);
+	api.registerPlatform(PLATFORM_NAME, HomebridgeFreeboxPlayerDelta);
 }
 
 class FreeboxPlayerPlugin {
