@@ -31,7 +31,7 @@ const SERVICE_IDENTIFIER_YOUTUBE = 4;
 const SERVICE_IDENTIFIER_MEDIA = 5;
 
 const IDENTIFIER_KEY_MAP = {
-	SERVICE_IDENTIFIER_HOME: PLAYER_APP_HOME;
+	SERVICE_IDENTIFIER_HOME: PLAYER_APP_HOME,
 	SERVICE_IDENTIFIER_TV: PLAYER_APP_TV,
 	SERVICE_IDENTIFIER_NETFLIX: PLAYER_APP_NETFLIX,
 	SERVICE_IDENTIFIER_YOUTUBE: PLAYER_APP_YOUTUBE,
@@ -78,59 +78,60 @@ class FreeboxPlayerDelta {
 		// Handle remote control input
 		tvService.getCharacteristic(this.Characteristic.RemoteKey)
 			.on("set", (newValue, callback) => {
-				case this.Characteristic.RemoteKey.REWIND: {
-					this.requestRemoteKey(PLAYER_REWIND);
-					break;
+				switch (newValue) {
+					case this.Characteristic.RemoteKey.REWIND: {
+						this.requestRemoteKey(PLAYER_REWIND);
+						break;
+					}
+					case this.Characteristic.RemoteKey.FAST_FORWARD: {
+						this.requestRemoteKey(PLAYER_FORWARD);
+						break;
+					}
+					case this.Characteristic.RemoteKey.NEXT_TRACK: {
+						this.requestRemoteKey(PLAYER_CHANNEL_UP);
+						break;
+					}
+					case this.Characteristic.RemoteKey.PREVIOUS_TRACK: {
+						this.requestRemoteKey(PLAYER_CHANNEL_DOWN);
+						break;
+					}
+					case this.Characteristic.RemoteKey.ARROW_UP: {
+						this.requestRemoteKey(PLAYER_UP);
+						break;
+					}
+					case this.Characteristic.RemoteKey.ARROW_DOWN: {
+						this.requestRemoteKey(PLAYER_DOWN);
+						break;
+					}
+					case this.Characteristic.RemoteKey.ARROW_LEFT: {
+						this.requestRemoteKey(PLAYER_LEFT);
+						break;
+					}
+					case this.Characteristic.RemoteKey.ARROW_RIGHT: {
+						this.requestRemoteKey(PLAYER_RIGHT);
+						break;
+					}
+					case this.Characteristic.RemoteKey.SELECT: {
+						this.requestRemoteKey(PLAYER_OK);
+						break;
+					}
+					case this.Characteristic.RemoteKey.BACK: {
+						this.requestRemoteKey(PLAYER_BACK);
+						break;
+					}
+					case this.Characteristic.RemoteKey.EXIT: {
+						this.requestRemoteKey(PLAYER_HOME);
+						break;
+					}
+					case this.Characteristic.RemoteKey.PLAY_PAUSE: {
+						this.requestRemoteKey(PLAYER_PLAY);
+						break;
+					}
+					case this.Characteristic.RemoteKey.INFORMATION: {
+						this.requestRemoteKey(PLAYER_INFO);
+						break;
+					}
 				}
-				case this.Characteristic.RemoteKey.FAST_FORWARD: {
-					this.requestRemoteKey(PLAYER_FORWARD);
-					break;
-				}
-				case this.Characteristic.RemoteKey.NEXT_TRACK: {
-					this.requestRemoteKey(PLAYER_CHANNEL_UP);
-					break;
-				}
-				case this.Characteristic.RemoteKey.PREVIOUS_TRACK: {
-					this.requestRemoteKey(PLAYER_CHANNEL_DOWN);
-					break;
-				}
-				case this.Characteristic.RemoteKey.ARROW_UP: {
-					this.requestRemoteKey(PLAYER_UP);
-					break;
-				}
-				case this.Characteristic.RemoteKey.ARROW_DOWN: {
-					this.requestRemoteKey(PLAYER_DOWN);
-					break;
-				}
-				case this.Characteristic.RemoteKey.ARROW_LEFT: {
-					this.requestRemoteKey(PLAYER_LEFT);
-					break;
-				}
-				case this.Characteristic.RemoteKey.ARROW_RIGHT: {
-					this.requestRemoteKey(PLAYER_RIGHT);
-					break;
-				}
-				case this.Characteristic.RemoteKey.SELECT: {
-					this.requestRemoteKey(PLAYER_OK);
-					break;
-				}
-				case this.Characteristic.RemoteKey.BACK: {
-					this.requestRemoteKey(PLAYER_BACK);
-					break;
-				}
-				case this.Characteristic.RemoteKey.EXIT: {
-					this.requestRemoteKey(PLAYER_HOME);
-					break;
-				}
-				case this.Characteristic.RemoteKey.PLAY_PAUSE: {
-					this.requestRemoteKey(PLAYER_PLAY);
-					break;
-				}
-				case this.Characteristic.RemoteKey.INFORMATION: {
-					this.requestRemoteKey(PLAYER_INFO);
-					break;
-				}
-		}
 				callback(null);
 			});
 
