@@ -1,5 +1,5 @@
 {
-	"pluginAlias": "HomebridgeFreeboxPlayerDelta",
+	"pluginAlias": "FreeboxPlayerDelta",
 	"pluginType": "platform",
 	"singular": true,
 	"headerDisplay": "Homebridge plugin to control your Freebox Player Delta",
