@@ -201,13 +201,13 @@ class FreeboxPlayerDelta {
 
 	// Determine power status
 	getPowerState() {
-		let powerState = this.Characteristic.Active.INACTIVE;
+		let powerState = 0;
 		let testUrl = "http://" + this.config.hostname + ":7000/";
 		request(testUrl, {timeout: 1000}, function (error, response, body) {
 			if (error) {
-				powerState = this.Characteristic.Active.INACTIVE;
+				powerState = 0;
 			} else if (response && response.statusCode == 404) {
-				powerState = this.Characteristic.Active.ACTIVE;
+				powerState = 1;
 			}
 		});
 		return powerState;
