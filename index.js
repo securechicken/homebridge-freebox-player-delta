@@ -26,7 +26,7 @@ module.exports = (api) => {
 	api.registerPlatform(PLATFORM_NAME, HomebridgeFreeboxPlayerDeltaPlugin);
 }
 
-class FreeboxPlayerPlugin {
+class HomebridgeFreeboxPlayerDeltaPlugin {
 	constructor(log, config, api) {
 		this.log = log;
 		// Expected keys: name, code, hostname
