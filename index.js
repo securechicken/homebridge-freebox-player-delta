@@ -31,10 +31,10 @@ IDENTIFIER_KEY_MAP = {
 };
 
 module.exports = (api) => {
-	api.registerPlatform(PLATFORM_NAME, FreeboxPlayerDeltaPlugin);
+	api.registerPlatform(PLATFORM_NAME, FreeboxPlayerDelta);
 }
 
-class FreeboxPlayerDeltaPlugin {
+class FreeboxPlayerDelta {
 	constructor(log, config, api) {
 		this.log = log;
 		// Expected keys: name, code, hostname
@@ -56,7 +56,7 @@ class FreeboxPlayerDeltaPlugin {
 		tvService.setCharacteristic(this.Characteristic.Active, this.getPowerState());
 		tvService.getCharacteristic(this.Characteristic.Active)
 			.on("get", (callback) => {
-				callback(null, this.getPowerState())
+				callback(null, this.getPowerState());
 			})
 			.on("set", (newValue, callback) => {
 				this.requestRemoteKey(PLAYER_POWER);
@@ -92,16 +92,16 @@ class FreeboxPlayerDeltaPlugin {
 		speakerService.setCharacteristic(this.Characteristic.Active, this.getPowerState());
 		speakerService.getCharacteristic(this.Characteristic.Active)
 			.on("get", (callback) => {
-				callback(null, this.getPowerState())
+				callback(null, this.getPowerState());
 			});
 		speakerService.setCharacteristic(this.Characteristic.VolumeControlType, this.Characteristic.VolumeControlType.ABSOLUTE);
 		// Handle speaker service volume control
 		speakerService.getCharacteristic(this.Characteristic.VolumeSelector)
 			.on("set", (newValue, callback) => {
 				if (newValue == 0) {
-					this.requestRemoteKey(PLAYER_VOLUME_UP)
+					this.requestRemoteKey(PLAYER_VOLUME_UP);
 				} else {
-					this.requestRemoteKey(PLAYER_VOLUME_DOWN)
+					this.requestRemoteKey(PLAYER_VOLUME_DOWN);
 				}
 				callback(null);
 			});
@@ -168,7 +168,7 @@ class FreeboxPlayerDeltaPlugin {
 	// Send remote key to Player
 	requestRemoteKey(key, callback) {
 		let url = "http://" + this.config.hostname + "/pub/remote_control?key=" + key + "&code=" + this.config.code;
-		this.log.info("Send Player Delta command: " + url)
+		this.log.info("Send Player Delta command: " + url);
 		request(url, function (error, response, body) {
 			if (callback != null) {
 				callback();
