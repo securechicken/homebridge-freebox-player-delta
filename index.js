@@ -169,10 +169,10 @@ class FreeboxPlayerDelta {
 		tvService.addLinkedService(homeInputService);
 		// TV
 		const tvInputService = this.tvAccessory.addService(this.Service.InputSource, "tv", "TV");
-		netflixInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_TV);
-		netflixInputService.setCharacteristic(this.Characteristic.ConfiguredName, "TV");
-		netflixInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
-		netflixInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+		tvInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_TV);
+		tvInputService.setCharacteristic(this.Characteristic.ConfiguredName, "TV");
+		tvInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
+		tvInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
 		tvService.addLinkedService(tvInputService);
 		// Netflix
 		const netflixInputService = this.tvAccessory.addService(this.Service.InputSource, "netflix", "Netflix");
@@ -180,21 +180,21 @@ class FreeboxPlayerDelta {
 		netflixInputService.setCharacteristic(this.Characteristic.ConfiguredName, "Netflix");
 		netflixInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
 		netflixInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-		tvService.addLinkedService(netflixInputService);
+		netflixInputService.addLinkedService(netflixInputService);
 		// YouTube
 		const youtubeInputService = this.tvAccessory.addService(this.Service.InputSource, "youtube", "Youtube");
-		netflixInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_YOUTUBE);
-		netflixInputService.setCharacteristic(this.Characteristic.ConfiguredName, "Youtube");
-		netflixInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
-		netflixInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-		tvService.addLinkedService(youtubeInputService);
+		youtubeInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_YOUTUBE);
+		youtubeInputService.setCharacteristic(this.Characteristic.ConfiguredName, "Youtube");
+		youtubeInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
+		youtubeInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+		youtubeInputService.addLinkedService(youtubeInputService);
 		// Media
 		const mediaInputService = this.tvAccessory.addService(this.Service.InputSource, "media", "Media");
-		netflixInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_MEDIA);
-		netflixInputService.setCharacteristic(this.Characteristic.ConfiguredName, "Media");
-		netflixInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
-		netflixInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-		tvService.addLinkedService(mediaInputService);
+		mediaInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_MEDIA);
+		mediaInputService.setCharacteristic(this.Characteristic.ConfiguredName, "Media");
+		mediaInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED);
+		mediaInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+		mediaInputService.addLinkedService(mediaInputService);
 
 		this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccessory]);
 	}
