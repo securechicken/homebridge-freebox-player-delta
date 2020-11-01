@@ -8,14 +8,13 @@ Via NPM (or within Homebridge Plugins tab): `npm install -g homebridge-freebox-p
 
 ## Configuration
 
-The plugin configuration item from Homebridge config (available from Plugin "Settings" button) appears as follow:
+The plugin configuration item from Homebridge config (available as form from Plugin "Settings" button) is written as follow:
 ```
 {
-    "platform": "HomebridgeFreeboxPlayer",
-    "name": "<your device fancy name>",
-    "code": "<your Freebox network remote code>",
-    "hostname": "<hostname or IPv4/6 address of your Player device",
-    "appsShortcutEnabled": <true or false, enables some apps launch shortcuts>
+	"platform": "HomebridgeFreeboxPlayerDelta",
+	"name": "<your device friendly name>",
+	"code": "<your Freebox network remote code>",
+	"hostname": "<hostname or IPv4/6 address of your Player device",
 }
 ```
 

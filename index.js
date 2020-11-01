@@ -1,201 +1,137 @@
-const PLUGIN_NAME = 'homebridge-freebox-player';
-const PLATFORM_NAME = 'HomebridgeFreeboxPlayer';
+const PLUGIN_NAME = 'homebridge-freebox-player-delta';
+const PLATFORM_NAME = 'HomebridgeFreeboxPlayerDelta';
 const request = require('request');
 
+// Freebox Player keys reference:
+// https://dev.freebox.fr/sdk/freebox_player_codes.html
+PLAYER_POWER = "power";
+PLAYER_CHANNEL_UP = "prgm_inc";
+PLAYER_CHANNEL_DOWN = "prgm_dec";
+PLAYER_VOLUME_UP = "vol_inc";
+PLAYER_VOLUME_DOWN = "vol_dec";
+PLAYER_INFO = "info";
+PLAYER_APP_HOME = "home";
+PLAYER_APP_TV = "tv";
+PLAYER_APP_NETFLIX = "netflix";
+PLAYER_APP_YOUTUBE = "youtube";
+PLAYER_APP_MEDIA = "media";
+
+SERVICE_IDENTIFIER_HOME = 1;
+SERVICE_IDENTIFIER_TV = 2;
+SERVICE_IDENTIFIER_NETFLIX = 3;
+SERVICE_IDENTIFIER_YOUTUBE = 4;
+SERVICE_IDENTIFIER_MEDIA = 5;
+
 module.exports = (api) => {
-    api.registerPlatform(PLATFORM_NAME, FreeboxPlayerPlugin);
+	api.registerPlatform(PLATFORM_NAME, FreeboxPlayerDeltaPlugin);
 }
 
 class FreeboxPlayerPlugin {
-    constructor(log, config, api) {
-        this.log = log;
-        this.config = config;
-        this.api = api;
+	constructor(log, config, api) {
+		this.log = log;
+		// Expected keys: name, code, hostname
+		this.config = config;
+		this.api = api;
 
-        this.Service = api.hap.Service;
-        this.Characteristic = api.hap.Characteristic;
+		// Register device and associated service
+		this.Service = api.hap.Service;
+		this.Characteristic = api.hap.Characteristic;
+		const tvName = this.config.name || 'FreeboxPlayerDelta'
+		const uuid = this.api.hap.uuid.generate('homebridge:freebox-player-delta' + tvName);
+		this.tvAccessory = new api.platformAccessory(tvName, uuid);
+		this.tvAccessory.category = this.api.hap.Categories.TELEVISION;
+		const tvService = this.tvAccessory.addService(this.Service.Television);
+		tvService.setCharacteristic(this.Characteristic.ConfiguredName, tvName);
+		tvService.setCharacteristic(this.Characteristic.SleepDiscoveryMode, this.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
 
-        const tvName = 'Freebox Player'
-        const uuid = this.api.hap.uuid.generate('homebridge:my-tv-plugin' + tvName);
-        this.tvAccessory = new api.platformAccessory(tvName, uuid);
-        this.tvAccessory.category = this.api.hap.Categories.TELEVISION;
+		// Handle ON/OFF state and Player power switch
+		tvService.getCharacteristic(this.Characteristic.Active)
+			.on('set', (newValue, callback) => {
+				this.requestRemoteKey(PLAYER_POWER);
+				tvService.updateCharacteristic(this.Characteristic.Active, 1);
+				callback(null);
+			});
 
-        const tvService = this.tvAccessory.addService(this.Service.Television);
-        tvService.setCharacteristic(this.Characteristic.ConfiguredName, tvName);
-        tvService.setCharacteristic(this.Characteristic.SleepDiscoveryMode, this.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+		// Initial service set to "HOME"
+		tvService.setCharacteristic(this.Characteristic.ActiveIdentifier, SERVICE_IDENTIFIER_HOME);
 
-        // handle on / off
-        tvService.getCharacteristic(this.Characteristic.Active)
-            .on('set', (newValue, callback) => {
-                this.requestRemoteKey('power');
-                tvService.updateCharacteristic(this.Characteristic.Active, 1);
-                callback(null);
-            });
+		// Handle remote control input
+		tvService.getCharacteristic(this.Characteristic.RemoteKey)
+			.on('set', (newValue, callback) => {
+				switch (newValue) {
+					case this.Characteristic.RemoteKey.CHANNEL_UP: {
+						this.requestRemoteKey(PLAYER_CHANNEL_UP);
+						break;
+					}
+					case this.Characteristic.RemoteKey.CHANNEL_DOWN: {
+						this.requestRemoteKey(PLAYER_CHANNEL_DOWN);
+						break;
+					}
+					case this.Characteristic.RemoteKey.INFO: {
+						this.requestRemoteKey(PLAYER_INFO);
+						break;
+					}
+				}
+				callback(null);
+			});
 
-        tvService.setCharacteristic(this.Characteristic.ActiveIdentifier, 1);
+		// Create an associated speaker service for Player
+		const speakerService = this.tvAccessory.addService(this.Service.TelevisionSpeaker);
+		speakerService.setCharacteristic(this.Characteristic.Active, this.Characteristic.Active.ACTIVE)
+		speakerService.setCharacteristic(this.Characteristic.VolumeControlType, this.Characteristic.VolumeControlType.ABSOLUTE);
+		// Handle speaker service volume control
+		speakerService.getCharacteristic(this.Characteristic.VolumeSelector)
+			.on('set', (newValue, callback) => {
+				if (newValue == 0) {
+					this.requestRemoteKey(PLAYER_VOLUME_UP)
+				} else {
+					this.requestRemoteKey(PLAYER_VOLUME_DOWN)
+				}
+				callback(null);
+			});
 
-        // handle input source changes
-        tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
-            .on('set', (newValue, callback) => {
-                this.requestSource(newValue);
-                callback(null);
-            });
+		// Handle input source changes, leveraged as app launchers
+		tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
+			.on('set', (newValue, callback) => {
+				this.requestSource(newValue);
+				callback(null);
+			});
+		// Home
+		const homeInputService = this.tvAccessory.addService(this.Service.InputSource, 'home', 'Home');
+		homeInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_HOME)
+		homeInputService.setCharacteristic(this.Characteristic.ConfiguredName, 'Home')
+		homeInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+		homeInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+		tvService.addLinkedService(homeInputService);
+		// Netflix Input Source
+		const netflixInputService = this.tvAccessory.addService(this.Service.InputSource, 'netflix', 'Netflix');
+		netflixInputService.setCharacteristic(this.Characteristic.Identifier, SERVICE_IDENTIFIER_NETFLIX)
+		netflixInputService.setCharacteristic(this.Characteristic.ConfiguredName, 'Netflix')
+		netflixInputService.setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+		netflixInputService.setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
+		tvService.addLinkedService(netflixInputService); // link to tv service
 
-        // handle remote control input
-        tvService.getCharacteristic(this.Characteristic.RemoteKey)
-            .on('set', (newValue, callback) => {
-                switch (newValue) {
-                    case this.Characteristic.RemoteKey.REWIND: {
-                        this.requestRemoteKey('bwd');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.FAST_FORWARD: {
-                        this.requestRemoteKey('fwd');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.NEXT_TRACK: {
-                        this.requestRemoteKey('fwd');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.PREVIOUS_TRACK: {
-                        this.requestRemoteKey('bwd');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.ARROW_UP: {
-                        this.requestRemoteKey('up');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.ARROW_DOWN: {
-                        this.requestRemoteKey('down');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.ARROW_LEFT: {
-                        this.requestRemoteKey('left');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.ARROW_RIGHT: {
-                        this.requestRemoteKey('right');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.SELECT: {
-                        this.requestRemoteKey('ok');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.BACK: {
-                        this.requestRemoteKey('red');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.EXIT: {
-                        this.requestRemoteKey('red');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.PLAY_PAUSE: {
-                        this.requestRemoteKey('play');
-                        break;
-                    }
-                    case this.Characteristic.RemoteKey.INFORMATION: {
-                        this.requestRemoteKey('yellow');
-                        break;
-                    }
-                }
-                callback(null);
-            });
+		this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccessory]);
+	}
 
-        const speakerService = this.tvAccessory.addService(this.Service.TelevisionSpeaker);
+	requestRemoteKey(key, callback) {
+		let url = 'http://' + this.config.hostname + '/pub/remote_control?key=' + key + '&code=' + this.config.code;
+		this.log.info("Send Player Delta command: " + url)
+		request(url, function (error, response, body) {
+			if (callback != null) {
+				callback();
+			}
+		});
+	}
 
-        speakerService
-            .setCharacteristic(this.Characteristic.Active, this.Characteristic.Active.ACTIVE)
-            .setCharacteristic(this.Characteristic.VolumeControlType, this.Characteristic.VolumeControlType.ABSOLUTE);
-
-        // handle volume control
-        speakerService.getCharacteristic(this.Characteristic.VolumeSelector)
-            .on('set', (newValue, callback) => {
-                if (newValue == 0) {
-                    this.requestRemoteKey('vol_inc')
-                } else {
-                    this.requestRemoteKey('vol_dec')
-                }
-                callback(null);
-            });
-
-
-        if (this.config.appsShortcutEnabled) {
-            // HDMI 1 Input Source
-            const hdmi1InputService = this.tvAccessory.addService(this.Service.InputSource, '-', '-');
-            hdmi1InputService
-                .setCharacteristic(this.Characteristic.Identifier, 1)
-                .setCharacteristic(this.Characteristic.ConfiguredName, '-')
-                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-            tvService.addLinkedService(hdmi1InputService); // link to tv service
-
-            // HDMI 2 Input Source
-            const hdmi2InputService = this.tvAccessory.addService(this.Service.InputSource, 'home', 'Home');
-            hdmi2InputService
-                .setCharacteristic(this.Characteristic.Identifier, 2)
-                .setCharacteristic(this.Characteristic.ConfiguredName, 'Home')
-                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-            tvService.addLinkedService(hdmi2InputService); // link to tv service
-
-            // Netflix Input Source
-            const netflixInputService = this.tvAccessory.addService(this.Service.InputSource, 'netflix', 'Netflix');
-            netflixInputService
-                .setCharacteristic(this.Characteristic.Identifier, 3)
-                .setCharacteristic(this.Characteristic.ConfiguredName, 'Netflix')
-                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-            tvService.addLinkedService(netflixInputService); // link to tv service
-
-            // YouTube Input Source
-            const youTubeInputService = this.tvAccessory.addService(this.Service.InputSource, 'youTube', 'YouTube');
-            youTubeInputService
-                .setCharacteristic(this.Characteristic.Identifier, 4)
-                .setCharacteristic(this.Characteristic.ConfiguredName, 'YouTube')
-                .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
-                .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.HDMI);
-            tvService.addLinkedService(youTubeInputService); // link to tv service
-        }
-
-        this.api.publishExternalAccessories(PLUGIN_NAME, [this.tvAccessory]);
-        this.netflixKeys = ['home', 'home', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'right', 'right', 'right', 'right', 'down', 'down', 'ok'];
-        this.youtubeKeys = ['home', 'home', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'right', 'ok'];
-        this.keyCounter = 0
-    }
-
-    requestRemoteKey(key, callback) {
-        let url = 'http://hd1.freebox.fr/pub/remote_control?key=' + key + '&code=' + this.config.code;
-        //console.log(url);
-        request(url, function (error, response, body) {
-            if (callback != null) {
-                callback();
-            }
-        });
-    }
-
-    requestSource(source) {
-        //console.log('[Source] Requested ' + source);
-        if (source == 2) {
-            this.requestRemoteKey('home')
-        }
-        if (source == 3) {
-            this.jumpMenu(this.netflixKeys);
-        }
-        if (source == 4) {
-            this.jumpMenu(this.youtubeKeys);
-        }
-    }
-
-    jumpMenu(path) {
-        if (this.keyCounter == path.length) {
-            this.keyCounter = 0;
-            return;
-        }
-        let key = path[this.keyCounter]
-        //console.log('requesting '+key);
-        this.requestRemoteKey(key, () => {
-            this.keyCounter = this.keyCounter + 1;
-            this.jumpMenu(path);
-        })
-    }
+	requestSource(source) {
+		switch(source) {
+			case SERVICE_IDENTIFIER_HOME: {
+				this.requestRemoteKey(PLAYER_APP_HOME);
+			}
+			case SERVICE_IDENTIFIER_NETFLIX: {
+				this.requestRemoteKey(PLAYER_APP_NETFLIX);
+			}
+		}
+	}
 }

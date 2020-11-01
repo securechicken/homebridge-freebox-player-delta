@@ -1,0 +1,33 @@
+{
+	"pluginAlias": "HomebridgeFreeboxPlayerDelta",
+	"pluginType": "platform",
+	"singular": true,
+	"headerDisplay": "Homebridge plugin to control your Freebox Player Delta",
+	"footerDisplay": null,
+	"schema": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"title": "Player Name",
+				"description": "Your Player friendly name",
+				"type": "string",
+				"required": true,
+				"default": "Freebox"
+			},
+			"code": {
+				"title": "Player Remote Code",
+				"description": "Your Freebox Player network remote code",
+				"type": "string",
+				"required": true
+			},
+			"hostname": {
+				"title": "Player Hostname",
+				"description": "Your Freebox Player device network hostname or IPv4/6 address"
+				"type": "string",
+				"required": true
+			}
+		}
+	},
+	"form": null,
+	"display": null
+}
