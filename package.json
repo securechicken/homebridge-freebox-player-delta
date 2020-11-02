@@ -3,9 +3,7 @@
 	"version": "0.0.1",
 	"description": "Homebridge plugin to control your Freebox Player Delta",
 	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
+	"scripts": null,
 	"engines": {
 		"homebridge": ">=1.1.6"
 	},
@@ -26,7 +24,8 @@
 		"url": "https://github.com/securechicken/homebridge-freebox-player-delta/issues"
 	},
 	"dependencies": {
-		"request": "2.88.0"
+		"request": ">=2.88.0",
+		"tcp-ping": ">=0.1.1"
 	},
 	"homepage": "https://github.com/securechicken/homebridge-freebox-player-delta"
 }
