@@ -2,7 +2,7 @@
 	"pluginAlias": "FreeboxPlayerDelta",
 	"pluginType": "platform",
 	"singular": true,
-	"headerDisplay": "Homebridge plugin to control your Freebox Player Delta",
+	"headerDisplay": "Homebridge plugin to control your Freebox Player Delta (Devialet)",
 	"footerDisplay": null,
 	"schema": {
 		"type": "object",
