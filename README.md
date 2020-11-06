@@ -3,10 +3,10 @@ Homebridge plugin to control Freebox Player Delta (Devialet). via HomeKit/iOS de
 
 It enables elementary controls (on/off, various apps launch, iOS remote control with volume).
 
-## Installation
+## Plugin Installation
 Via NPM (or within Homebridge Plugins tab): `npm install -g homebridge-freebox-player-delta`
 
-## Configuration
+## Settings
 
 The plugin configuration is done via Homebridge UI plugins settings.
 The result is saved in config as follows:
@@ -24,7 +24,7 @@ The Freebox network remote **code** can be found in your Freebox Player UI, brow
 The **hostname** used to be set to "hd1.freebox.fr" by default for older Freebox Revolution Players.
 On Delta/Devialet, it is not the case anymore: put the IPv4 address of your player (you can find it from your devices list in Freebox Server UI), or the Player hostname in _System (Système) > Network (Réseau) > Player network name (Nom réseau du Player)_.
 
-## Installation
+## Association
 
 - Run HomeKit app on your iOS device, select "+", "Add an accessory", then "I don't have a code..." top down
 - Type-in your Homebridge code (shown below QR Code in Homebridge UI)
