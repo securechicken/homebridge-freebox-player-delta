@@ -1,11 +1,15 @@
 {
 	"name": "homebridge-freebox-player-delta",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "Homebridge plugin to control your Freebox Player Delta",
 	"main": "index.js",
-	"scripts": null,
+	"scripts": {
+		"lint": "jshint index.js",
+		"test": "npm run lint && echo 'No test :('",
+		"dev": "sudo npm link && sudo hb-service restart"
+	},
 	"engines": {
-		"homebridge": ">=1.1.6"
+		"homebridge": "^1.1.6"
 	},
 	"repository": {
 		"type": "git",
@@ -24,8 +28,21 @@
 		"url": "https://github.com/securechicken/homebridge-freebox-player-delta/issues"
 	},
 	"dependencies": {
-		"request": ">=2.88.0",
-		"tcp-ping": ">=0.1.1"
+		"request": "^2.88.0",
+		"tcp-ping": "^0.1.1"
+	},
+	"devDependencies": {
+		"jshint": "^2.12.0",
+		"np": "^7.0.0"
+	},
+	"jshintConfig": {
+		"bitwise": true,
+		"esversion": 6,
+		"strict": "implied",
+		"undef": true,
+		"unused": true,
+		"module": true,
+		"node": true
 	},
 	"homepage": "https://github.com/securechicken/homebridge-freebox-player-delta"
 }
