@@ -1,6 +1,6 @@
 const PLUGIN_NAME = "homebridge-freebox-player-delta";
 const PLUGIN_AUTHOR = "@securechicken";
-const PLUGIN_VERSION = "1.0.0";
+const PLUGIN_VERSION = "1.1.0";
 const PLUGIN_DEVICE_MANUFACTURER = "Free";
 const PLUGIN_DEVICE_MODEL = "Freebox Player Devialet";
 const PLATFORM_NAME = "FreeboxPlayerDelta";
@@ -43,6 +43,7 @@ const SOURCE_IDENTIFIER_TV = 2;
 const SOURCE_IDENTIFIER_NETFLIX = 3;
 const SOURCE_IDENTIFIER_YOUTUBE = 4;
 const SOURCE_IDENTIFIER_MEDIA = 5;
+const DELAY_POWER_HOME = 1000;
 
 class FreeboxPlayerDelta {
 	constructor(log, config, api) {
@@ -176,7 +177,11 @@ class FreeboxPlayerDelta {
 						this.tvPowerState = (state) ? (this.Characteristic.Active.ACTIVE) : (this.Characteristic.Active.INACTIVE);
 						this.tvService.updateCharacteristic(this.Characteristic.Active, this.tvPowerState);
 						this.speakerService.updateCharacteristic(this.Characteristic.Mute, !state);
-
+						if (this.tvPowerState == this.Characteristic.Active.ACTIVE) {
+							setTimeout( () => {
+								this.tvService.setCharacteristic(this.Characteristic.ActiveIdentifier, SOURCE_IDENTIFIER_HOME);
+							}, DELAY_POWER_HOME);
+						}
 					} else {
 						this.log.error("Setting power state failed: " + JSON.stringify(err));
 					}
@@ -240,7 +245,7 @@ class FreeboxPlayerDelta {
 	static SendNetworkRemoteKey(hostname, code, key, logger, callback) {
 		request.get("http://" + hostname + "/pub/remote_control?code=" + code + "&key=" + key,
 			(err, resp) => {
-				logger.debug("Remote command '" + key + "' sent to '" + hostname + "' (" + key + "):" + JSON.stringify(err) + ", " + (resp && resp.statusCode));
+				logger.debug("Remote command '" + key + "' sent to '" + hostname + "' (" + code + "): " + JSON.stringify(err) + ", " + (resp && resp.statusCode));
 				callback(err, !err && resp && resp.statusCode == 200);
 			});
 	}
