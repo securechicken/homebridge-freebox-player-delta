@@ -1,3 +1,10 @@
+/*
+homebridge-freebox-player-delta
+Homebridge plugin to control Freebox Player Delta.
+Licensed under GPL-3.0 License [https://www.gnu.org/licenses/gpl-3.0.en.html].
+Copyright (C) 2020, @securechicken
+*/
+
 const PLUGIN_NAME = "homebridge-freebox-player-delta";
 const PLUGIN_AUTHOR = "@securechicken";
 const PLUGIN_VERSION = "1.1.0";
