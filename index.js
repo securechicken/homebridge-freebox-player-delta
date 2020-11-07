@@ -7,11 +7,11 @@ Copyright (C) 2020, @securechicken
 
 const PLUGIN_NAME = "homebridge-freebox-player-delta";
 const PLUGIN_AUTHOR = "@securechicken";
-const PLUGIN_VERSION = "1.1.0";
+const PLUGIN_VERSION = "1.2.0-alpha";
 const PLUGIN_DEVICE_MANUFACTURER = "Free";
 const PLUGIN_DEVICE_MODEL = "Freebox Player Devialet";
 const PLATFORM_NAME = "FreeboxPlayerDelta";
-const request = require("request");
+const fetch = require("node-fetch");
 const tcpp = require("tcp-ping");
 
 module.exports = (api) => {
@@ -21,6 +21,7 @@ module.exports = (api) => {
 const TCP_ALIVE_CHECK_PORT = 7000;
 const TCP_ALIVE_TIMEOUT = 500;
 const TCP_ALIVE_ATTEMPTS = 1;
+const HTTP_TIMEOUT = TCP_ALIVE_TIMEOUT;
 // Freebox Player keys reference:
 // https://dev.freebox.fr/sdk/freebox_player_codes.html
 // http://tutoriels.domotique-store.fr/content/51/90/fr/api-de-la-freebox-tv-_-player-v5-_-v6-via-requêtes-http.html
@@ -250,10 +251,15 @@ class FreeboxPlayerDelta {
 
 	// Send remote key to player network remote API
 	static SendNetworkRemoteKey(hostname, code, key, logger, callback) {
-		request.get("http://" + hostname + "/pub/remote_control?code=" + code + "&key=" + key,
-			(err, resp) => {
-				logger.debug("Remote command '" + key + "' sent to '" + hostname + "' (" + code + "): " + JSON.stringify(err) + ", " + (resp && resp.statusCode));
-				callback(err, !err && resp && resp.statusCode == 200);
-			});
+		let msg = "Remote command '" + key + "' sent to '" + hostname + "' (" + code + "): ";
+		fetch("http://" + hostname + "/pub/remote_control?code=" + code + "&key=" + key, {timeout: HTTP_TIMEOUT})
+			.then( (resp) => {
+				if (resp.ok) {
+					logger.debug(msg + resp.status);
+					callback(null, true);
+				} else {
+					throw new Error(msg + resp.status);
+				} } )
+			.catch( err => callback(err, false) );
 	}
 }

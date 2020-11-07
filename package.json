@@ -28,7 +28,7 @@
 		"url": "https://github.com/securechicken/homebridge-freebox-player-delta/issues"
 	},
 	"dependencies": {
-		"request": "^2.88.0",
+		"node-fetch": "^2.6.1",
 		"tcp-ping": "^0.1.1"
 	},
 	"devDependencies": {
