@@ -3,6 +3,10 @@
 	"version": "1.2.0",
 	"description": "Homebridge plugin to control your Freebox Player Delta",
 	"main": "index.js",
+	"files": [
+		"index.js",
+		"config.schema.json"
+	],
 	"scripts": {
 		"lint": "jshint index.js",
 		"test": "npm run lint && echo 'No test :('",
