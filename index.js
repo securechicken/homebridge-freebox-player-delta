@@ -7,7 +7,7 @@ Copyright (C) 2020, @securechicken
 
 const PLUGIN_NAME = "homebridge-freebox-player-delta";
 const PLUGIN_AUTHOR = "@securechicken";
-const PLUGIN_VERSION = "1.2.1";
+const PLUGIN_VERSION = "1.2.2";
 const PLUGIN_DEVICE_MANUFACTURER = "Free";
 const PLUGIN_DEVICE_MODEL = "Freebox Player Devialet";
 const PLATFORM_NAME = "FreeboxPlayerDelta";
@@ -36,8 +36,8 @@ const PLAYER_RED = "red";
 //const PLAYER_YELLOW = "yellow";
 const PLAYER_INFO = "info";
 const PLAYER_PLAY = "play";
-//const PLAYER_REWIND = "bwd";
-//const PLAYER_FORWARD = "fwd";
+const PLAYER_REWIND = "bwd";
+const PLAYER_FORWARD = "fwd";
 const PLAYER_UP = "up";
 const PLAYER_DOWN = "down";
 const PLAYER_LEFT = "left";
@@ -63,6 +63,11 @@ class FreeboxPlayerDelta {
 		this.api = api;
 		this.Service = api.hap.Service;
 		this.Characteristic = api.hap.Characteristic;
+		
+		if (!( (this.config) && (this.config.name) && (this.config.hostname) && (this.config.code) )) {
+			this.log.error("Plugin configuration is not valid: every value must be set");
+			return;
+		}
 
 		// Register platform
 		const tvName = this.config.name || "Freebox";
@@ -119,6 +124,10 @@ class FreeboxPlayerDelta {
 			.on("set", this.setTvPowerState.bind(this));
 		// Handle remote control input
 		this.defaultRemoteKeyMapping = new Map([
+			[this.Characteristic.RemoteKey.REWIND, PLAYER_REWIND],
+			[this.Characteristic.RemoteKey.FAST_FORWARD, PLAYER_FORWARD],
+			[this.Characteristic.RemoteKey.NEXT_TRACK, PLAYER_CHANNEL_DOWN],
+			[this.Characteristic.RemoteKey.PREVIOUS_TRACK, PLAYER_CHANNEL_UP],
 			[this.Characteristic.RemoteKey.ARROW_UP, PLAYER_UP],
 			[this.Characteristic.RemoteKey.ARROW_DOWN, PLAYER_DOWN],
 			[this.Characteristic.RemoteKey.ARROW_LEFT, PLAYER_LEFT],
@@ -126,34 +135,27 @@ class FreeboxPlayerDelta {
 			[this.Characteristic.RemoteKey.SELECT, PLAYER_OK],
 			[this.Characteristic.RemoteKey.BACK, PLAYER_RED],
 			[this.Characteristic.RemoteKey.EXIT, PLAYER_APP_HOME],
-			[this.Characteristic.RemoteKey.PLAY_PAUSE, PLAYER_OK],
-			[this.Characteristic.RemoteKey.INFORMATION, PLAYER_INFO]]);
-		this.sourceRemoteKeyMapping = new Map();
-		this.sourceRemoteKeyMapping.set(SOURCE_IDENTIFIER_HOME, this.defaultRemoteKeyMapping);
-		this.sourceRemoteKeyMapping.set(SOURCE_IDENTIFIER_TV, new Map([
-			[this.Characteristic.RemoteKey.ARROW_UP, PLAYER_UP],
-			[this.Characteristic.RemoteKey.ARROW_DOWN, PLAYER_DOWN],
-			[this.Characteristic.RemoteKey.ARROW_LEFT, PLAYER_CHANNEL_DOWN],
-			[this.Characteristic.RemoteKey.ARROW_RIGHT, PLAYER_CHANNEL_UP],
-			[this.Characteristic.RemoteKey.SELECT, PLAYER_OK],
-			[this.Characteristic.RemoteKey.BACK, PLAYER_RED],
-			[this.Characteristic.RemoteKey.EXIT, PLAYER_APP_HOME],
 			[this.Characteristic.RemoteKey.PLAY_PAUSE, PLAYER_PLAY],
-			[this.Characteristic.RemoteKey.INFORMATION, PLAYER_INFO]]));
-		this.sourceRemoteKeyMapping.set(SOURCE_IDENTIFIER_NETFLIX, this.defaultRemoteKeyMapping);
-		this.sourceRemoteKeyMapping.set(SOURCE_IDENTIFIER_YOUTUBE, this.defaultRemoteKeyMapping);
-		this.sourceRemoteKeyMapping.set(SOURCE_IDENTIFIER_MEDIA, this.defaultRemoteKeyMapping);
-		this.remoteKeyMapping = this.sourceRemoteKeyMapping.get(SOURCE_IDENTIFIER_HOME);
+			[this.Characteristic.RemoteKey.INFORMATION, PLAYER_INFO]]);
+		this.sourceRemoteKeyMappings = new Map();
+		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_HOME, this.defaultRemoteKeyMapping);
+		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_TV, this.defaultRemoteKeyMapping);
+		this.sourceRemoteKeyMappings.get(SOURCE_IDENTIFIER_TV)
+			.set(this.Characteristic.RemoteKey.ARROW_LEFT, PLAYER_CHANNEL_DOWN)
+			.set(this.Characteristic.RemoteKey.ARROW_RIGHT, PLAYER_CHANNEL_UP);
+		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_NETFLIX, this.defaultRemoteKeyMapping);
+		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_YOUTUBE, this.defaultRemoteKeyMapping);
+		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_MEDIA, this.defaultRemoteKeyMapping);
+		this.remoteKeyMapping = this.defaultRemoteKeyMapping;
 		this.tvService.getCharacteristic(this.Characteristic.RemoteKey)
 			.on("set", this.setTvRemoteKey.bind(this));
 		// Handle input source (leveraged as app launchers) change
-		this.inputSourceMapping = new Map();
-		this.inputSourceMapping
-			.set(SOURCE_IDENTIFIER_HOME, PLAYER_APP_HOME)
-			.set(SOURCE_IDENTIFIER_TV, PLAYER_APP_TV)
-			.set(SOURCE_IDENTIFIER_NETFLIX, PLAYER_APP_NETFLIX)
-			.set(SOURCE_IDENTIFIER_YOUTUBE, PLAYER_APP_YOUTUBE)
-			.set(SOURCE_IDENTIFIER_MEDIA, PLAYER_APP_MEDIA);
+		this.inputSourceMapping = new Map([
+			[SOURCE_IDENTIFIER_HOME, PLAYER_APP_HOME],
+			[SOURCE_IDENTIFIER_TV, PLAYER_APP_TV],
+			[SOURCE_IDENTIFIER_NETFLIX, PLAYER_APP_NETFLIX],
+			[SOURCE_IDENTIFIER_YOUTUBE, PLAYER_APP_YOUTUBE],
+			[SOURCE_IDENTIFIER_MEDIA, PLAYER_APP_MEDIA]]);
 		this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
 			.on("set", this.setTvInputSource.bind(this));
 		// Speaker mute state (elementary, from TV ON/OFF state: real mute from remotes is not handled)
@@ -232,7 +234,7 @@ class FreeboxPlayerDelta {
 				if (err) {
 					this.log.error("Switching player input source failed: " + JSON.stringify(err));
 				} else {
-					this.remoteKeyMapping = this.sourceRemoteKeyMapping.get(source);
+					this.remoteKeyMapping = this.sourceRemoteKeyMappings.get(source);
 				}
 				callback(err);
 			});

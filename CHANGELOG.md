@@ -6,4 +6,4 @@
 - Added: a changelog
 
 ## [Unreleased]
-
+- Added: to comply with Homebridge verified guidelines, plugins will not load if conf empty or invalid.
