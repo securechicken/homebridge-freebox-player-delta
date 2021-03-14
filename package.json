@@ -28,6 +28,10 @@
 	],
 	"author": "@securechicken",
 	"license": "GPL-3.0",
+	"funding": {
+		"type" : "individual",
+		"url" : "https://www.paypal.com/donate?business=EJLS4QWSCUVKA&item_name=Support+SecureChicken+developments"
+	},
 	"bugs": {
 		"url": "https://github.com/securechicken/homebridge-freebox-player-delta/issues"
 	},
