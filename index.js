@@ -7,7 +7,7 @@ Copyright (C) 2020, @securechicken
 
 const PLUGIN_NAME = "homebridge-freebox-player-delta";
 const PLUGIN_AUTHOR = "@securechicken";
-const PLUGIN_VERSION = "1.2.2";
+const PLUGIN_VERSION = "1.2.3";
 const PLUGIN_DEVICE_MANUFACTURER = "Free";
 const PLUGIN_DEVICE_MODEL = "Freebox Player Devialet";
 const PLATFORM_NAME = "FreeboxPlayerDelta";
@@ -139,7 +139,7 @@ class FreeboxPlayerDelta {
 			[this.Characteristic.RemoteKey.INFORMATION, PLAYER_INFO]]);
 		this.sourceRemoteKeyMappings = new Map();
 		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_HOME, this.defaultRemoteKeyMapping);
-		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_TV, this.defaultRemoteKeyMapping);
+		this.sourceRemoteKeyMappings.set(SOURCE_IDENTIFIER_TV, new Map(this.defaultRemoteKeyMapping));
 		this.sourceRemoteKeyMappings.get(SOURCE_IDENTIFIER_TV)
 			.set(this.Characteristic.RemoteKey.ARROW_LEFT, PLAYER_CHANNEL_DOWN)
 			.set(this.Characteristic.RemoteKey.ARROW_RIGHT, PLAYER_CHANNEL_UP);

@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.3] - 2021-03-19
+- Fixed: invalid key mapping at HOME, due to changes in 1.2.1.
+
 ## [1.2.2] - 2021-03-14
 - Added: to comply with Homebridge verified guidelines, plugins will not load if conf empty or invalid.
 
