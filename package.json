@@ -1,6 +1,6 @@
 {
 	"name": "homebridge-freebox-player-delta",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"description": "Homebridge plugin to control your Freebox Player Delta",
 	"main": "index.js",
 	"files": [
