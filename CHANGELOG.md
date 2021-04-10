@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.4] - 2021-04-10
+- Added: is now a "Verified" Homebridge plugin.
+
 ## [1.2.3] - 2021-03-19
 - Fixed: invalid key mapping at HOME, due to changes in 1.2.1.
 
