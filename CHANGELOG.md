@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.3.0] - 2021-07-16
+- Added: user can now choose which service to check in order to determine Player power status. Information in plugin project page.
+
 ## [1.2.4] - 2021-04-10
 - Added: is now a "Verified" Homebridge plugin.
 

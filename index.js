@@ -7,7 +7,7 @@ Copyright (C) 2020-2021, @securechicken
 
 const PLUGIN_NAME = "homebridge-freebox-player-delta";
 const PLUGIN_AUTHOR = "@securechicken";
-const PLUGIN_VERSION = "1.2.4";
+const PLUGIN_VERSION = "1.3.0";
 const PLUGIN_DEVICE_MANUFACTURER = "Free";
 const PLUGIN_DEVICE_MODEL = "Freebox Player Devialet";
 const PLATFORM_NAME = "FreeboxPlayerDelta";
@@ -18,7 +18,6 @@ module.exports = (api) => {
 	api.registerPlatform(PLATFORM_NAME, FreeboxPlayerDelta);
 };
 
-const TCP_ALIVE_CHECK_PORT = 7000;
 const TCP_ALIVE_TIMEOUT = 500;
 const TCP_ALIVE_ATTEMPTS = 1;
 const HTTP_TIMEOUT = TCP_ALIVE_TIMEOUT;
@@ -64,7 +63,7 @@ class FreeboxPlayerDelta {
 		this.Service = api.hap.Service;
 		this.Characteristic = api.hap.Characteristic;
 		
-		if (!( (this.config) && (this.config.name) && (this.config.hostname) && (this.config.code) )) {
+		if (!( (this.config) && (this.config.name) && (this.config.hostname) && (this.config.code) && (this.config.powerstatus) )) {
 			this.log.error("Plugin configuration is not valid: every value must be set");
 			return;
 		}
@@ -182,7 +181,7 @@ class FreeboxPlayerDelta {
 
 	// Determine TV power status
 	getTvPowerState(callback) {
-		FreeboxPlayerDelta.CheckIfAlive(this.config.hostname, this.log,
+		FreeboxPlayerDelta.CheckIfAlive(this.config.hostname, this.config.powerstatus, this.log,
 			(err, ok) => {
 				if (err) {
 					this.log.error("Getting power state failed: " + err);
@@ -258,8 +257,8 @@ class FreeboxPlayerDelta {
 	}
 
 	// Check if player is alive
-	static CheckIfAlive(hostname, logger, callback) {
-		tcpp.ping({address: hostname, port: TCP_ALIVE_CHECK_PORT, timeout: TCP_ALIVE_TIMEOUT, attempts: TCP_ALIVE_ATTEMPTS},
+	static CheckIfAlive(hostname, port, logger, callback) {
+		tcpp.ping({address: hostname, port: port, timeout: TCP_ALIVE_TIMEOUT, attempts: TCP_ALIVE_ATTEMPTS},
 			(err, data) => {
 				logger.debug("Power state check: " + JSON.stringify(err) + ", " + JSON.stringify(data));
 				callback(err, !err && (data.min !== undefined));

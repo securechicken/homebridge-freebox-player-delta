@@ -25,6 +25,17 @@
 				"description": "Your Freebox Player device network hostname or IPv4/6 address",
 				"type": "string",
 				"required": true
+			},
+			"powerstatus": {
+				"title": "Player Power Status Checked Service",
+				"description": "The Player network service (TCP port) to check in order to determine if the Player is ON or OFF",
+				"type": "integer",
+				"default": 7000,
+				"oneOf": [
+					{ "title": "AirPlay (TCP 7000)", "enum": [7000] },
+					{ "title": "UPnP (TCP 54243)", "enum": [54243] }
+				],
+				"required": true
 			}
 		}
 	},
