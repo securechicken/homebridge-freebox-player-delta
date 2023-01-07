@@ -1,7 +1,8 @@
 # homebridge-freebox-player-delta
 Homebridge plugin to control Freebox Player Delta (Devialet) via HomeKit/iOS devices.
 
-[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+| :exclamation:  Unfortunately I'm not using Homebridge anymore, and as a consequence does not maintain the plugin - which can still be forked and updated elsewhere if need be. |
+|-----------------------------------------|
 
 It enables elementary controls: on/off, Netflix/Youtube apps launch, iOS remote control with volume.
 
